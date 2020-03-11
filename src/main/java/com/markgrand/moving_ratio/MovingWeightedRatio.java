@@ -13,7 +13,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p> The counters are kept as 15 bit quantities. When any of the counters overflow, all the counters are
  * right-shifted. These operations are thread-safe and do not block.</p>
  */
-public class MovingWeightedRatio {
+public class MovingWeightedRatio extends AbstractMovingWeightedRatio {
+    private static final int A_INCREMENT = 0x10000;
+    private static final int A_OVERFLOW_MASK = 0x80000000;
+
+    private static final int B_INCREMENT = 1;
+    private static final int B_OVERFLOW_MASK = 0x8000;
+
+    private static final int CLEAR_OVERFLOW_BITS_MASK = 0x7fff7fff;
+    private static final int LOW_ORDER_15_BITS_MASK = 0x7fff;
+
     private final AtomicInteger counter = new AtomicInteger(0);
 
     /**
@@ -21,9 +30,9 @@ public class MovingWeightedRatio {
      */
     public void incrementCounterA() {
         counter.updateAndGet(i -> {
-            int newValue = i + 0x10000;
-            if ((newValue & 0x80000000) != 0) {
-                newValue = (newValue >> 1) & 0x7fff7fff;
+            int newValue = i + A_INCREMENT;
+            if ((newValue & A_OVERFLOW_MASK) != 0) {
+                newValue = (newValue >> 1) & CLEAR_OVERFLOW_BITS_MASK;
             }
             return newValue;
         });
@@ -34,9 +43,9 @@ public class MovingWeightedRatio {
      */
     public void incrementCounterB() {
         counter.updateAndGet(i -> {
-            int newValue = i + 1;
-            if ((newValue & 0x00008000) != 0) {
-                newValue = (newValue >> 1) & 0x7fff7fff;
+            int newValue = i + B_INCREMENT;
+            if ((newValue & B_OVERFLOW_MASK) != 0) {
+                newValue = (newValue >> 1) & CLEAR_OVERFLOW_BITS_MASK;
             }
             return newValue;
         });
@@ -49,8 +58,8 @@ public class MovingWeightedRatio {
      */
     public float getAOverB() {
         int i = counter.get();
-        int b = i & 0x7fff;
-        int a = (i >> 16) & 0x7fff;
+        int b = i & LOW_ORDER_15_BITS_MASK;
+        int a = (i >> 16) & LOW_ORDER_15_BITS_MASK;
         return ratio(a, b);
     }
 
@@ -61,15 +70,9 @@ public class MovingWeightedRatio {
      */
     public float getBOverA() {
         int i = counter.get();
-        int b = i & 0x7fff;
-        int a = (i >> 16) & 0x7fff;
+        int b = i & LOW_ORDER_15_BITS_MASK;
+        int a = (i >> 16) & LOW_ORDER_15_BITS_MASK;
         return ratio(b, a);
     }
 
-    private static float ratio(int numerator, int denominator) {
-        if (denominator == 0) {
-            return 0.0f;
-        }
-        return (float) numerator / (float) denominator;
-    }
 }
