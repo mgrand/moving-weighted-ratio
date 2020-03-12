@@ -66,7 +66,7 @@ public class MovingWeightedRatio extends AbstractMovingWeightedRatio {
     /**
      * compute B / A
      *
-     * @return B / A unless A == 0. If B == 0 then return 0.
+     * @return B / A unless A == 0. If A == 0 then return 0.
      */
     public float getBOverA() {
         int i = counter.get();
