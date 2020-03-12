@@ -17,7 +17,7 @@ public class MovingWeightedRatio4 extends AbstractMovingWeightedRatio {
     private static final long A_INCREMENT = 0x1000000000000L;
     private static final int A_RIGHT_SHIFT = 48;
 
-    private static final long B_INCREMENT = 100000000L;
+    private static final long B_INCREMENT = 0x100000000L;
     private static final int B_RIGHT_SHIFT = 32;
 
     private static final long C_INCREMENT = 0x10000;
@@ -70,8 +70,8 @@ public class MovingWeightedRatio4 extends AbstractMovingWeightedRatio {
 
     private float get(int numeratorRightShift, int denominatorRightShift) {
         long i = counter.get();
-        int numerator = ((int)i >> numeratorRightShift) & LOW_ORDER_15_BITS_MASK;
-        int denominator = ((int)i >> denominatorRightShift) & LOW_ORDER_15_BITS_MASK;
+        int numerator = (int)(i >> numeratorRightShift) & LOW_ORDER_15_BITS_MASK;
+        int denominator = (int)(i >> denominatorRightShift) & LOW_ORDER_15_BITS_MASK;
         return ratio(numerator, denominator);
     }
 
