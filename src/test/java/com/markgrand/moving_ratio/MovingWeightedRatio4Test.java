@@ -69,7 +69,24 @@ class MovingWeightedRatio4Test {
     }
 
     @Test
-    void getBOverA() {
+    void bOverA() {
+        MovingWeightedRatio4 mwr = new MovingWeightedRatio4();
+        assertEquals(0.0f, mwr.getBOverA());
+        incrementBOverA(mwr);
+        assertEquals(0.5f, mwr.getBOverA());
+        for (int i = 0; i < 100000; i++) {
+            incrementBOverA(mwr);
+        }
+        assertEquals(0.5f, mwr.getBOverA());
+    }
+
+    private void incrementBOverA(final MovingWeightedRatio4 mwr) {
+        mwr.incrementCounterB();
+        mwr.incrementCounterB();
+        mwr.incrementCounterA();
+        mwr.incrementCounterA();
+        mwr.incrementCounterA();
+        mwr.incrementCounterA();
     }
 
     @Test
